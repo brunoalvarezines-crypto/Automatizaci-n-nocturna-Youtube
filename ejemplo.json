@@ -1,0 +1,17 @@
+{
+  "videos": [
+    {
+      "titulo": "Nadie te mira tanto como crees 👀 #psicología",
+      "descripcion": "Se llama efecto foco: sobreestimamos cuánto se fija la gente en nosotros. En un experimento de la Universidad de Cornell, estudiantes con una camiseta vergonzosa creyeron que la mitad de la clase se había dado cuenta. En realidad, solo uno de cada cuatro. ¿Te ha pasado?",
+      "etiquetas": ["psicología", "efectofoco", "autoestima", "shorts"],
+      "escenas": [
+        {"texto": "Ese día que te sentiste observado por todo el mundo… casi nadie se dio cuenta.", "busqueda": "crowd street people walking"},
+        {"texto": "En la Universidad de Cornell pidieron a unos estudiantes que entraran en clase con una camiseta muy vergonzosa.", "busqueda": "university classroom students"},
+        {"texto": "Después les preguntaron: ¿cuánta gente crees que se ha fijado? Ellos dijeron: la mitad de la clase.", "busqueda": "young man embarrassed"},
+        {"texto": "La realidad: solo uno de cada cuatro. Menos de la mitad de lo que imaginaban.", "busqueda": "people ignoring phone"},
+        {"texto": "Se llama efecto foco. Como tú vives dentro de tu cabeza, crees que todos te miran con la misma lupa.", "busqueda": "spotlight stage light"},
+        {"texto": "Pero cada persona está ocupada con su propio foco. La próxima vez que te dé vergüenza algo, recuerda: tú eres tu público más exigente.", "busqueda": "person smiling relief"}
+      ]
+    }
+  ]
+}

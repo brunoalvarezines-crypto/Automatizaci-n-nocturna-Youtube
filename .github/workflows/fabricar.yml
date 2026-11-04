@@ -1,0 +1,49 @@
+name: Fabricar Shorts
+
+on:
+  repository_dispatch:
+    types: [fabricar]
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: "JSON con los vídeos (déjalo vacío para usar ejemplo.json)"
+        required: false
+        default: ""
+
+jobs:
+  fabricar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar herramientas
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          pip install -q requests
+
+      - name: Fabricar los Shorts
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VOZ: ${{ vars.VOZ || 'es-ES-AlvaroNeural' }}
+          VELOCIDAD: ${{ vars.VELOCIDAD || '+8%' }}
+          PAYLOAD: ${{ github.event_name == 'repository_dispatch' && toJson(github.event.client_payload) || inputs.payload }}
+        run: python render.py
+
+      - name: Guardar copia de los vídeos (7 días)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts
+          path: salida/*.mp4
+          retention-days: 7
+          if-no-files-found: ignore
