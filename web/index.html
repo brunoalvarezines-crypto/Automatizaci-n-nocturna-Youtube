@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d0f1a">
+<title>Turno nocturno</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%230d0f1a'/><path d='M20 7a10 10 0 1 0 5 15A8 8 0 0 1 20 7z' fill='%23f2c879'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --bg-2: #141728;
+    --card: #181b2f;
+    --line: #262a44;
+    --text: #f3ede2;
+    --muted: #9a9cb5;
+    --moon: #f2c879;
+    --moon-soft: rgba(242, 200, 121, .12);
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font: 15px/1.5 Inter, system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(1200px 500px at 85% -10%, rgba(242,200,121,.10), transparent 60%),
+      radial-gradient(900px 400px at -10% 10%, rgba(120,110,220,.12), transparent 60%),
+      var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 64px; }
+
+  header { padding: 44px 0 28px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .luna {
+    width: 54px; height: 54px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle at 35% 35%, #fff4d6, var(--moon) 55%, #c9953f);
+    box-shadow: 0 0 40px rgba(242,200,121,.35);
+    position: relative; overflow: hidden;
+  }
+  .luna::after { content: ""; position: absolute; inset: -6px -14px auto auto; width: 46px; height: 46px; border-radius: 50%; background: var(--bg); opacity: .92; }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: clamp(30px, 6vw, 44px); line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 6px 0 0; }
+  .stats { margin-left: auto; display: flex; gap: 10px; }
+  .stat { background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px; padding: 8px 14px; text-align: center; min-width: 84px; }
+  .stat b { display: block; font-family: Fraunces, serif; font-size: 22px; font-weight: 600; color: var(--moon); }
+  .stat span { font-size: 12px; color: var(--muted); }
+
+  .noche { margin-top: 34px; }
+  .noche-cab { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .noche h2 { font-family: Fraunces, Georgia, serif; font-weight: 400; font-size: 22px; margin: 0; }
+  .noche h2::first-letter { text-transform: uppercase; }
+  .chip { font-size: 12px; font-weight: 500; color: var(--moon); background: var(--moon-soft); border-radius: 99px; padding: 3px 10px; }
+  .chip.gris { color: var(--muted); background: var(--bg-2); }
+
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+  .short { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: border-color .2s, transform .2s; }
+  .short:hover { border-color: #3a3f63; transform: translateY(-2px); }
+  .pantalla { position: relative; aspect-ratio: 9 / 16; background: #05060c; }
+  .pantalla video, .pantalla img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .play {
+    position: absolute; inset: 0; border: 0; padding: 0; cursor: pointer;
+    background: linear-gradient(to top, rgba(5,6,12,.75), transparent 45%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .play i { width: 62px; height: 62px; border-radius: 50%; background: rgba(13,15,26,.55); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.25); display: grid; place-items: center; transition: transform .2s, background .2s; }
+  .play:hover i { transform: scale(1.08); background: rgba(242,200,121,.9); }
+  .play svg { width: 22px; height: 22px; margin-left: 3px; fill: #fff; }
+  .play:hover svg { fill: var(--bg); }
+  .dur { position: absolute; left: 10px; bottom: 10px; font-size: 12px; font-weight: 600; background: rgba(5,6,12,.7); padding: 2px 8px; border-radius: 99px; pointer-events: none; }
+  .num { position: absolute; left: 10px; top: 10px; font-family: Fraunces, serif; font-size: 15px; font-weight: 600; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--moon); color: var(--bg); pointer-events: none; }
+
+  .info { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .titulo { font-weight: 600; font-size: 15px; line-height: 1.35; margin: 0; }
+  .acciones { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
+  .btn { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: 500 13px Inter, sans-serif; color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; cursor: pointer; text-decoration: none; transition: background .15s, border-color .15s; white-space: nowrap; }
+  .btn:hover { background: #20243d; border-color: #3a3f63; }
+  .btn.prim { background: var(--moon); color: var(--bg); border-color: var(--moon); }
+  .btn.prim:hover { background: #f7d796; }
+  .btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .vacio { text-align: center; padding: 80px 20px; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); margin-top: 20px; }
+  .vacio b { display: block; font-family: Fraunces, serif; font-weight: 400; font-size: 24px; color: var(--text); margin-bottom: 6px; }
+
+  .aviso { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; background: var(--moon); color: var(--bg); font-weight: 600; padding: 10px 18px; border-radius: 99px; transition: .25s; pointer-events: none; z-index: 9; }
+  .aviso.ver { opacity: 1; transform: translate(-50%, 0); }
+
+  footer { margin-top: 56px; color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (max-width: 560px) {
+    header { padding-top: 28px; }
+    .stats { margin-left: 0; width: 100%; }
+    .stat { flex: 1; }
+    .rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .info { padding: 10px 10px 12px; gap: 10px; }
+    .titulo { font-size: 13px; }
+    .btn { font-size: 12px; padding: 8px 6px; }
+    .btn .txt-largo { display: none; }
+    .play i { width: 50px; height: 50px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="luna" aria-hidden="true"></div>
+    <div>
+      <h1>Turno nocturno</h1>
+      <p class="sub">Los Shorts que se fabricaron mientras dormías.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="st-total">–</b><span>Shorts</span></div>
+      <div class="stat"><b id="st-noches">–</b><span>Noches</span></div>
+    </div>
+  </header>
+
+  <main id="galeria" aria-live="polite"></main>
+
+  <footer>Se guardan los últimos 30 días · Fabricado cada noche a la 1:00</footer>
+</div>
+<div class="aviso" id="aviso">Copiado</div>
+
+<script>
+const ICONOS = {
+  play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+  bajar: '<svg viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>',
+  copiar: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+};
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function fechaNoche(clave) {
+  const [d, h = "0000"] = clave.split("_");
+  const f = new Date(`${d}T${h.slice(0, 2)}:${h.slice(2, 4)}:00`);
+  if (isNaN(f)) return clave;
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const dias = Math.round((hoy - new Date(f.getFullYear(), f.getMonth(), f.getDate())) / 864e5);
+  const texto = f.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  return { texto, etiqueta: dias === 0 ? "Esta noche" : dias === 1 ? "Ayer" : `Hace ${dias} días`, reciente: dias <= 1 };
+}
+
+function tarjeta(v, i) {
+  const desc = [v.descripcion, v.hashtags].filter(Boolean).join("\n\n");
+  return `
+  <article class="short">
+    <div class="pantalla">
+      ${v.portada ? `<img src="${esc(v.portada)}" alt="" loading="lazy">` : ""}
+      <span class="num">${i + 1}</span>
+      ${v.segundos ? `<span class="dur">${v.segundos} s</span>` : ""}
+      <button class="play" data-src="${esc(v.url)}" aria-label="Reproducir ${esc(v.titulo)}"><i>${ICONOS.play}</i></button>
+    </div>
+    <div class="info">
+      <p class="titulo">${esc(v.titulo)}</p>
+      <div class="acciones">
+        <a class="btn prim" href="${esc(v.url)}" download>${ICONOS.bajar}<span>Descargar</span></a>
+        <button class="btn" data-copiar="${esc(v.titulo)}">${ICONOS.copiar}<span>Título</span></button>
+        <button class="btn" data-copiar="${esc(desc)}">${ICONOS.copiar}<span>Descripción</span></button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function pintar(videos) {
+  const g = document.getElementById("galeria");
+  const noches = {};
+  videos.forEach(v => (noches[v.noche] ??= []).push(v));
+  const claves = Object.keys(noches).sort().reverse();
+  document.getElementById("st-total").textContent = videos.length;
+  document.getElementById("st-noches").textContent = claves.length;
+  if (!videos.length) {
+    g.innerHTML = `<div class="vacio"><b>Todavía no hay Shorts</b>Los primeros aparecerán aquí después del próximo turno nocturno.</div>`;
+    return;
+  }
+  g.innerHTML = claves.map(k => {
+    const f = fechaNoche(k);
+    return `<section class="noche">
+      <div class="noche-cab">
+        <h2>${esc(f.texto || k)}</h2>
+        ${f.etiqueta ? `<span class="chip ${f.reciente ? "" : "gris"}">${f.etiqueta}</span>` : ""}
+        <span class="chip gris">${noches[k].length} Shorts</span>
+      </div>
+      <div class="rejilla">${noches[k].map(tarjeta).join("")}</div>
+    </section>`;
+  }).join("");
+}
+
+document.addEventListener("click", async e => {
+  const play = e.target.closest(".play");
+  if (play) {
+    document.querySelectorAll(".pantalla video").forEach(v => v.pause());
+    const caja = play.parentElement;
+    const video = document.createElement("video");
+    Object.assign(video, { src: play.dataset.src, controls: true, autoplay: true, playsInline: true });
+    caja.querySelector("img")?.remove();
+    play.replaceWith(video);
+    video.addEventListener("play", () => document.querySelectorAll(".pantalla video").forEach(o => o !== video && o.pause()));
+    return;
+  }
+  const btn = e.target.closest("[data-copiar]");
+  if (btn) {
+    try { await navigator.clipboard.writeText(btn.dataset.copiar); }
+    catch {
+      const t = Object.assign(document.createElement("textarea"), { value: btn.dataset.copiar });
+      document.body.append(t); t.select(); document.execCommand("copy"); t.remove();
+    }
+    const a = document.getElementById("aviso");
+    a.textContent = btn.textContent.trim() + " copiado";
+    a.classList.add("ver"); clearTimeout(a._t); a._t = setTimeout(() => a.classList.remove("ver"), 1600);
+  }
+});
+
+fetch("videos.json?v=" + Date.now())
+  .then(r => r.ok ? r.json() : [])
+  .catch(() => [])
+  .then(pintar);
+</script>
+</body>
+</html>

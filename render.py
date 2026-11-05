@@ -172,6 +172,8 @@ def fabricar(video, n):
     ff("-i", "imagen.mp4", "-i", "voz.m4a", "-vf", "ass=subs.ass",
        "-c:v", "libx264", "-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p",
        "-c:a", "copy", "-shortest", "-movflags", "+faststart", f"../{final.name}", cwd=carpeta)
+    ff("-ss", "1.2", "-i", str(final), "-frames:v", "1", "-vf", "scale=540:-1", "-q:v", "4",
+       str(final.with_suffix(".jpg")))  # portada para la web
     return final, t
 
 
@@ -185,25 +187,27 @@ def tg(metodo, **kw):
     r.raise_for_status()
 
 
-def enviar(video, ruta, seg, n):
-    titulo = video.get("titulo", f"Short {n}")
-    with open(ruta, "rb") as fh:
-        tg("sendVideo", data={"caption": f"🎬 {n}. {titulo} ({seg:.0f} s)"[:1000], "supports_streaming": "true"},
-           files={"video": fh})
+def ficha(video, ruta, seg):
     etiquetas = " ".join("#" + e.lstrip("#").replace(" ", "") for e in video.get("etiquetas", []))
-    texto = f"TÍTULO:\n{titulo}\n\nDESCRIPCIÓN:\n{video.get('descripcion', '')}\n\n{etiquetas}".strip()
-    tg("sendMessage", data={"text": texto[:4000]})
+    return {
+        "archivo": ruta.name,
+        "portada": ruta.with_suffix(".jpg").name,
+        "titulo": video.get("titulo", ruta.stem),
+        "descripcion": video.get("descripcion", ""),
+        "hashtags": etiquetas,
+        "segundos": round(seg),
+    }
 
 
 def main():
     SALIDA.mkdir(exist_ok=True)
     videos = cargar_videos()
-    fallos = 0
+    fallos, fichas = 0, []
     for n, video in enumerate(videos, 1):
         try:
             ruta, seg = fabricar(video, n)
             print(f"OK {ruta} ({seg:.1f} s)")
-            enviar(video, ruta, seg, n)
+            fichas.append(ficha(video, ruta, seg))
         except Exception as e:  # un vídeo roto no para a los demás
             fallos += 1
             traceback.print_exc()
@@ -211,9 +215,11 @@ def main():
                 tg("sendMessage", data={"text": f"⚠️ El Short {n} falló: {e}"[:4000]})
             except Exception:
                 pass
-    hechos = len(videos) - fallos
+    (SALIDA / "meta.json").write_text(json.dumps(fichas, ensure_ascii=False, indent=2), encoding="utf-8")
+    url = os.environ.get("GALERIA_URL", "")
     try:
-        tg("sendMessage", data={"text": f"🌙 Turno nocturno terminado: {hechos} de {len(videos)} Shorts listos."})
+        tg("sendMessage", data={"text": f"🌙 Turno nocturno terminado: {len(fichas)} de {len(videos)} Shorts listos.\n"
+                                        f"En un par de minutos los tienes en tu web:\n{url}".strip()})
     except Exception:
         pass
     sys.exit(1 if fallos else 0)

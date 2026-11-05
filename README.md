@@ -1,6 +1,6 @@
 # Turno Nocturno
 
-Fábrica automática de Shorts: recibe guiones (desde Make) y devuelve vídeos verticales de ~60 s a Telegram.
+Fábrica automática de Shorts: recibe guiones (desde Make) y publica vídeos verticales de ~60 s en una web privada de revisión (Telegram solo avisa).
 
 **Cada vídeo:** voz de Azure + clips verticales de Pexels + subtítulos → MP4 1080×1920.
 
@@ -34,3 +34,9 @@ Unas 6 escenas y ~150 palabras ≈ 60 segundos.
 Opcional (pestaña *Variables*): `VOZ` (por defecto `es-ES-AlvaroNeural`; otra opción `es-ES-ElviraNeural`) y `VELOCIDAD` (por defecto `+8%`).
 
 Los vídeos también quedan 7 días en *Actions → (ejecución) → Artifacts*.
+
+## La web (galería)
+- Dirección: https://brunoalvarezines-crypto.github.io/Automatizaci-n-nocturna-Youtube/
+- Vive en la rama `galeria`, que se rehace cada noche (guarda los últimos 30 días, sin engordar el repositorio).
+- Activación (una sola vez): *Settings → Pages → Source: Deploy from a branch → `galeria` / `(root)` → Save*.
+- Diseño: `web/index.html`. Lógica: `galeria.py`.

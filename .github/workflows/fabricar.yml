@@ -10,6 +10,13 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: write
+
+concurrency:
+  group: galeria
+  cancel-in-progress: false
+
 jobs:
   fabricar:
     runs-on: ubuntu-latest
@@ -36,14 +43,23 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           VOZ: ${{ vars.VOZ || 'es-ES-AlvaroNeural' }}
           VELOCIDAD: ${{ vars.VELOCIDAD || '+8%' }}
+          GALERIA_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           PAYLOAD: ${{ github.event_name == 'repository_dispatch' && toJson(github.event.client_payload) || inputs.payload }}
         run: python render.py
 
-      - name: Guardar copia de los vídeos (7 días)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: shorts
-          path: salida/*.mp4
-          retention-days: 7
-          if-no-files-found: ignore
+      - name: Publicar en la web
+        if: always() && hashFiles('salida/meta.json') != ''
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REMOTO="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git clone -q --depth 1 --branch galeria "$REMOTO" web_actual 2>/dev/null || mkdir -p web_actual
+          rm -rf web_actual/.git
+          python galeria.py salida web_actual
+          cd web_actual
+          git init -q -b galeria
+          git config user.name "turno-nocturno"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Galería $(date +%F)"
+          git push -q -f "$REMOTO" galeria
