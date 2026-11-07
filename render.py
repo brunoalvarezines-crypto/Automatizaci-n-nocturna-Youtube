@@ -5,7 +5,7 @@ Entrada: JSON {"videos": [{"titulo", "descripcion", "etiquetas", "escenas": [{"t
   - texto:    lo que dice la voz en esa escena (español)
   - busqueda: palabras clave EN INGLÉS para buscar el clip en Pexels
 
-Por cada vídeo: voz (Azure) + clips verticales (Pexels) + subtítulos -> MP4 1080x1920,
+Por cada vídeo: voz (Azure) + clips (Pixabay o Pexels) + subtítulos -> MP4 1080x1920,
 y lo envía a Telegram con su título y descripción.
 """
 import html
@@ -78,33 +78,59 @@ def tts(texto, destino):
 _usados = set()
 
 
+def _descargar(url, destino):
+    with requests.get(url, stream=True, timeout=180) as d:
+        d.raise_for_status()
+        with open(destino, "wb") as fh:
+            for trozo in d.iter_content(1 << 20):
+                fh.write(trozo)
+
+
+def _candidatos_pixabay(q):
+    """Vídeos de Pixabay: primero los verticales, luego los horizontales (se recortan al centro)."""
+    r = requests.get(
+        "https://pixabay.com/api/videos/",
+        params={"key": os.environ["PIXABAY_API_KEY"], "q": q[:100], "per_page": 30, "safesearch": "true"},
+        timeout=30,
+    )
+    r.raise_for_status()
+    verticales, horizontales = [], []
+    for v in r.json().get("hits", []):
+        tamanos = [t for t in (v.get("videos") or {}).values() if t.get("url") and t.get("width") and t.get("height")]
+        if not tamanos:
+            continue
+        mejor = min(tamanos, key=lambda t: abs(max(t["width"], t["height"]) - 1920))
+        (verticales if mejor["height"] >= mejor["width"] else horizontales).append((v["id"], mejor["url"]))
+    return verticales + horizontales
+
+
+def _candidatos_pexels(q):
+    r = requests.get(
+        "https://api.pexels.com/videos/search",
+        headers={"Authorization": os.environ["PEXELS_API_KEY"]},
+        params={"query": q, "orientation": "portrait", "per_page": 15},
+        timeout=30,
+    )
+    r.raise_for_status()
+    salida = []
+    for v in r.json().get("videos", []):
+        files = [f for f in v.get("video_files", [])
+                 if f.get("width") and f.get("height") and f["height"] >= f["width"] and f["height"] >= 1280]
+        if files:
+            salida.append((v["id"], min(files, key=lambda f: abs(f["height"] - 1920))["link"]))
+    return salida
+
+
 def buscar_clip(consulta, destino):
+    buscar = _candidatos_pixabay if os.environ.get("PIXABAY_API_KEY") else _candidatos_pexels
     for q in [consulta, *CLIPS_RESERVA]:
-        r = requests.get(
-            "https://api.pexels.com/videos/search",
-            headers={"Authorization": os.environ["PEXELS_API_KEY"]},
-            params={"query": q, "orientation": "portrait", "per_page": 15},
-            timeout=30,
-        )
-        r.raise_for_status()
-        for v in r.json().get("videos", []):
-            if v["id"] in _usados:
+        for vid, url in buscar(q):
+            if vid in _usados:
                 continue
-            files = [
-                f for f in v.get("video_files", [])
-                if f.get("width") and f.get("height") and f["height"] >= f["width"] and f["height"] >= 1280
-            ]
-            if not files:
-                continue
-            elegido = min(files, key=lambda f: abs(f["height"] - 1920))
-            _usados.add(v["id"])
-            with requests.get(elegido["link"], stream=True, timeout=180) as d:
-                d.raise_for_status()
-                with open(destino, "wb") as fh:
-                    for trozo in d.iter_content(1 << 20):
-                        fh.write(trozo)
+            _usados.add(vid)
+            _descargar(url, destino)
             return
-    raise RuntimeError(f"No encontré clip vertical para: {consulta}")
+    raise RuntimeError(f"No encontré clip para: {consulta}")
 
 
 # ---------- subtítulos ----------

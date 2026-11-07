@@ -2,7 +2,7 @@
 
 Fábrica automática de Shorts: recibe guiones (desde Make) y publica vídeos verticales de ~60 s en una web privada de revisión (Telegram solo avisa).
 
-**Cada vídeo:** voz de Azure + clips verticales de Pexels + subtítulos → MP4 1080×1920.
+**Cada vídeo:** voz de Azure + clips de Pixabay + subtítulos → MP4 1080×1920.
 
 ## Cómo se activa
 - **Desde Make (cada noche):** petición `POST https://api.github.com/repos/brunoalvarezines-crypto/Automatizaci-n-nocturna-Youtube/dispatches`
@@ -16,7 +16,7 @@ Fábrica automática de Shorts: recibe guiones (desde Make) y publica vídeos ve
   "descripcion": "…",
   "etiquetas": ["psicología", "shorts"],
   "escenas": [
-    {"texto": "Lo que dice la voz (español)", "busqueda": "english keywords for pexels"}
+    {"texto": "Lo que dice la voz (español)", "busqueda": "english keywords for the stock clip"}
   ]
 }
 ```
@@ -27,7 +27,7 @@ Unas 6 escenas y ~150 palabras ≈ 60 segundos.
 |---|---|
 | `AZURE_SPEECH_KEY` | Clave del recurso Speech de Azure (plan F0 gratuito) |
 | `AZURE_SPEECH_REGION` | Región del recurso, p. ej. `westeurope` |
-| `PEXELS_API_KEY` | Clave de la API de Pexels |
+| `PIXABAY_API_KEY` | Clave de la API de Pixabay (o `PEXELS_API_KEY` si tienes una de Pexels) |
 | `TELEGRAM_BOT_TOKEN` | Token del bot de Telegram |
 | `TELEGRAM_CHAT_ID` | ID del chat donde llegan los vídeos |
 
